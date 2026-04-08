@@ -1,10 +1,66 @@
 [
-  {"id": 5415,  "name": "Montréal/P.E. Trudeau Intl A", "start": 1941, "end": 2013},
-  {"id": 10761, "name": "Montréal/P.E. Trudeau Intl A", "start": 2013, "end": null},
-  {"id": 7024,  "name": "Montréal McGill",              "start": 1871, "end": 1993},
-  {"id": 30165, "name": "Montréal (UQAM)",               "start": 1993, "end": 2019},
-  {"id": 48374, "name": "Montréal McTavish",             "start": 2002, "end": null},
-  {"id": 5417,  "name": "Montréal Ville-Marie",          "start": 1941, "end": 1980},
-  {"id": 5424,  "name": "Montréal St-Hubert A",          "start": 1928, "end": 2019},
-  {"id": 51157, "name": "Montréal St-Hubert A",          "start": 2013, "end": null}
+  {
+    "id": 5415,
+    "name": "Montréal/P.E. Trudeau Intl A",
+    "start": 1941,
+    "end": 2013,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 10761,
+    "name": "Montréal/P.E. Trudeau Intl A",
+    "start": 2013,
+    "end": 2026,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 7024,
+    "name": "Montréal McGill",
+    "start": 1871,
+    "end": 1993,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 30165,
+    "name": "Montréal (UQAM)",
+    "start": 1993,
+    "end": 2019,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 48374,
+    "name": "Montréal McTavish",
+    "start": 2002,
+    "end": 2026,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 5417,
+    "name": "Montréal Ville-Marie",
+    "start": 1941,
+    "end": 1980,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 5424,
+    "name": "Montréal St-Hubert A",
+    "start": 1928,
+    "end": 2019,
+    "years_scanned": 0,
+    "years_with_data": 0
+  },
+  {
+    "id": 51157,
+    "name": "Montréal St-Hubert A",
+    "start": 2013,
+    "end": 2026,
+    "years_scanned": 0,
+    "years_with_data": 0
+  }
 ]
