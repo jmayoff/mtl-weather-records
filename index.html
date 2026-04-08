@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Montréal Weather Records</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #f7f6f3;
+      --surface:    #ffffff;
+      --border:     rgba(0,0,0,0.10);
+      --text:       #1a1a18;
+      --muted:      #5f5e5a;
+      --accent-r:   #d85a30;   /* record high — coral */
+      --accent-r-bg:#faece7;
+      --accent-b:   #185fa5;   /* record low — blue */
+      --accent-b-bg:#e6f1fb;
+      --accent-g:   #3b6d11;   /* good/normal — green */
+      --radius:     12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #1c1c1a;
+        --surface:    #272725;
+        --border:     rgba(255,255,255,0.10);
+        --text:       #f0ede8;
+        --muted:      #a8a59f;
+        --accent-r:   #f0997b;
+        --accent-r-bg:#3a1a10;
+        --accent-b:   #85b7eb;
+        --accent-b-bg:#0c2240;
+        --accent-g:   #97c459;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    /* ── Date picker section ── */
+    .date-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .date-section label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type="date"] {
+      font-size: 1rem;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .today-btn {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .today-btn:hover { background: var(--bg); }
+
+    /* ── Record cards ── */
+    .records-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 520px) {
+      .records-grid { grid-template-columns: 1fr; }
+    }
+
+    .record-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      position: relative;
+    }
+
+    .record-card.high {
+      border-top: 3px solid var(--accent-r);
+    }
+
+    .record-card.low {
+      border-top: 3px solid var(--accent-b);
+    }
+
+    .record-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .record-card.high .record-label { color: var(--accent-r); }
+    .record-card.low  .record-label { color: var(--accent-b); }
+
+    .record-temp {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .record-card.high .record-temp { color: var(--accent-r); }
+    .record-card.low  .record-temp { color: var(--accent-b); }
+
+    .record-meta {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .record-meta strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── Data summary bar ── */
+    .summary-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .summary-bar span strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── Station breakdown ── */
+    details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    summary::before {
+      content: "▶";
+      font-size: 0.7rem;
+      color: var(--muted);
+      transition: transform 0.15s;
+      display: inline-block;
+    }
+
+    details[open] summary::before { transform: rotate(90deg); }
+
+    .stations-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    .stations-table th, .stations-table td {
+      padding: 0.5rem 1.25rem;
+      text-align: left;
+      border-top: 1px solid var(--border);
+    }
+
+    .stations-table th {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stations-table tr:hover td { background: var(--bg); }
+
+    .pill {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .pill.high { background: var(--accent-r-bg); color: var(--accent-r); }
+    .pill.low  { background: var(--accent-b-bg); color: var(--accent-b); }
+
+    /* ── Loading / error states ── */
+    #status {
+      padding: 3rem 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .error { color: #d85a30; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--accent-b); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    #last-updated {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌡 Montréal Weather Records</h1>
+  <span class="subtitle">All-time record high &amp; low per day across historical ECCC stations</span>
+  <span id="last-updated"></span>
+</header>
+
+<main>
+  <div id="status">Loading climate data…</div>
+  <div id="dashboard" style="display:none">
+
+    <div class="date-section">
+      <label for="datePicker">Pick a date:</label>
+      <input type="date" id="datePicker" />
+      <button class="today-btn" id="todayBtn">Today</button>
+    </div>
+
+    <div class="records-grid">
+      <div class="record-card high">
+        <div class="record-label">Record High</div>
+        <div class="record-temp" id="highTemp">—</div>
+        <div class="record-meta" id="highMeta"></div>
+      </div>
+      <div class="record-card low">
+        <div class="record-label">Record Low</div>
+        <div class="record-temp" id="lowTemp">—</div>
+        <div class="record-meta" id="lowMeta"></div>
+      </div>
+    </div>
+
+    <div class="summary-bar" id="summaryBar"></div>
+
+    <details id="stationDetails">
+      <summary>Per-station data sources</summary>
+      <table class="stations-table" id="stationsTable">
+        <thead>
+          <tr>
+            <th>Station</th>
+            <th>Years active</th>
+            <th>Years scanned</th>
+            <th>Years with data</th>
+          </tr>
+        </thead>
+        <tbody id="stationsBody"></tbody>
+      </table>
+    </details>
+
+  </div>
+</main>
+
+<footer>
+  Data: <a href="https://climate.weather.gc.ca" target="_blank">Environment &amp; Climate Change Canada</a>
+  — Open Government Licence Canada —
+  <a href="https://github.com/YOUR_USERNAME/mtl-weather-records" target="_blank">Source on GitHub</a>
+</footer>
+
+<script>
+  const datePicker  = document.getElementById("datePicker");
+  const todayBtn    = document.getElementById("todayBtn");
+  const highTemp    = document.getElementById("highTemp");
+  const lowTemp     = document.getElementById("lowTemp");
+  const highMeta    = document.getElementById("highMeta");
+  const lowMeta     = document.getElementById("lowMeta");
+  const summaryBar  = document.getElementById("summaryBar");
+  const stationsBody= document.getElementById("stationsBody");
+  const statusEl    = document.getElementById("status");
+  const dashboardEl = document.getElementById("dashboard");
+  const lastUpdated = document.getElementById("last-updated");
+
+  let recordsData = null;
+  let stationsData = null;
+
+  function todayMMDD() {
+    const d = new Date();
+    return `${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function formatDate(isoStr) {
+    // isoStr = "YYYY-MM-DD" from input[type=date]
+    const [y,m,d] = isoStr.split("-").map(Number);
+    return new Date(y,m-1,d).toLocaleDateString("en-CA", {month:"long", day:"numeric"});
+  }
+
+  function mmddFromInput(val) {
+    // val = "YYYY-MM-DD"
+    return val.slice(5); // "MM-DD"
+  }
+
+  function render(dateVal) {
+    const mmdd = mmddFromInput(dateVal);
+    const entry = recordsData.records[mmdd];
+
+    if (!entry) {
+      highTemp.textContent = "—";
+      lowTemp.textContent  = "—";
+      highMeta.innerHTML   = "No data for this date.";
+      lowMeta.innerHTML    = "No data for this date.";
+      summaryBar.innerHTML = "";
+      return;
+    }
+
+    // High
+    if (entry.high) {
+      highTemp.textContent = `${entry.high.temp.toFixed(1)} °C`;
+      highMeta.innerHTML = `
+        <strong>${entry.high.year}</strong> &nbsp;·&nbsp; ${entry.high.station_name}
+      `;
+    } else {
+      highTemp.textContent = "—";
+      highMeta.innerHTML = "No high temp data.";
+    }
+
+    // Low
+    if (entry.low) {
+      lowTemp.textContent = `${entry.low.temp.toFixed(1)} °C`;
+      lowMeta.innerHTML = `
+        <strong>${entry.low.year}</strong> &nbsp;·&nbsp; ${entry.low.station_name}
+      `;
+    } else {
+      lowTemp.textContent = "—";
+      lowMeta.innerHTML = "No low temp data.";
+    }
+
+    // Summary bar
+    const totalYears = stationsData.reduce((s, st) => {
+      const end = st.end || new Date().getFullYear();
+      return s + (end - st.start + 1);
+    }, 0);
+    const totalWithData = stationsData.reduce((s, st) => s + (st.years_with_data || 0), 0);
+    const earliestYear = stationsData.reduce((mn, st) => Math.min(mn, st.start), 9999);
+
+    summaryBar.innerHTML = `
+      <span>Showing records for <strong>${formatDate(dateVal)}</strong></span>
+      <span><strong>${stationsData.length}</strong> stations scanned</span>
+      <span>Data from <strong>${earliestYear}</strong> to present</span>
+      <span><strong>${totalWithData}</strong> station-years of data</span>
+    `;
+  }
+
+  function buildStationTable() {
+    stationsBody.innerHTML = stationsData.map(st => {
+      const end = st.end || new Date().getFullYear();
+      return `<tr>
+        <td>${st.name} <span style="font-size:0.78rem;color:var(--muted)">#${st.id}</span></td>
+        <td>${st.start}–${end}</td>
+        <td>${st.years_scanned ?? "—"}</td>
+        <td>${st.years_with_data ?? "—"}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // Init
+  async function init() {
+    try {
+      const [recResp, staResp] = await Promise.all([
+        fetch("data/records.json"),
+        fetch("data/stations.json"),
+      ]);
+
+      if (!recResp.ok) throw new Error(`records.json: ${recResp.status}`);
+      if (!staResp.ok) throw new Error(`stations.json: ${staResp.status}`);
+
+      recordsData  = await recResp.json();
+      stationsData = await staResp.json();
+
+      if (recordsData.generated) {
+        const d = new Date(recordsData.generated);
+        lastUpdated.textContent = `Updated ${d.toLocaleDateString("en-CA", {year:"numeric",month:"short",day:"numeric"})}`;
+      }
+
+      buildStationTable();
+
+      const today = todayISO();
+      datePicker.value = today;
+      render(today);
+
+      statusEl.style.display = "none";
+      dashboardEl.style.display = "";
+
+    } catch (err) {
+      statusEl.innerHTML = `
+        <p class="error">⚠ Could not load climate data.</p>
+        <p style="margin-top:.5rem;font-size:.85rem">${err.message}</p>
+        <p style="margin-top:.5rem;font-size:.85rem">
+          Run <code>python scripts/fetch_records.py</code> to generate
+          <code>data/records.json</code>, then push to GitHub Pages.
+        </p>
+      `;
+    }
+  }
+
+  datePicker.addEventListener("change", () => render(datePicker.value));
+  todayBtn.addEventListener("click", () => {
+    datePicker.value = todayISO();
+    render(datePicker.value);
+  });
+
+  init();
+</script>
+</body>
+</html>
